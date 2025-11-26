@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODA PRO: Body Balance System</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        .slide-up { animation: slideUp 0.4s ease-out; }
+        
+        @media print {
+            * {
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                color: #000 !important;
+                background: transparent !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            html, body {
+                width: 100% !important;
+                height: 100% !important;
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            /* Скрыть интерактивные элементы */
+            button, input[type="button"], input[type="submit"], a.btn, 
+            .no-print, nav, footer, [class*="no-print"], 
+            .fixed, .sticky, .absolute { 
+                display: none !important; 
+            }
+
+            /* Показать только контент */
+            .container { max-width: 100% !important; }
+
+            /* Текст и заголовки */
+            h1, h2, h3, h4, h5, h6, p, span, li, label, div {
+                color: #000 !important;
+                background: transparent !important;
+                border: none !important;
+            }
+
+            /* Избегать разрывов страниц */
+            .print-break, .bg-gray-800, .card, section, article, div[class*="p-6"], div[class*="p-4"] {
+                page-break-inside: avoid !important;
+                margin-bottom: 20px !important;
+            }
+
+            /* Grid и Flex для печати */
+            .grid, [class*="grid-cols"], [class*="grid-md"] {
+                display: block !important;
+            }
+            .grid > *, [class*="grid-cols"] > * {
+                display: block !important;
+                width: 100% !important;
+                page-break-inside: avoid !important;
+                margin-bottom: 15px !important;
+            }
+
+            .flex, [class*="flex"] {
+                display: block !important;
+            }
+            .flex > *, [class*="flex"] > * {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            /* Скрыть иконки Font Awesome */
+            i, [class*="fa-"], .fas, .far, .fal, .fad, .fab {
+                display: none !important;
+            }
+
+            /* Таблицы */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                border: 1px solid #000 !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+            }
+            td, th {
+                border: 1px solid #000 !important;
+                padding: 8px !important;
+                color: #000 !important;
+                text-align: left !important;
+                background: #fff !important;
+            }
+            thead {
+                display: table-header-group !important;
+            }
+            tfoot {
+                display: table-footer-group !important;
+            }
+
+            /* Пространства для печати */
+            .space-y-2 > *, .space-y-3 > *, .space-y-4 > *, .space-y-6 > * {
+                margin-bottom: 8px !important;
+                margin-top: 0 !important;
+            }
+
+            /* Масштабирование */
+            @page {
+                margin: 10mm;
+                size: A4;
+            }
+
+            /* Убрать фоновые изображения */
+            [style*="background-image"] {
+                background-image: none !important;
+            }
+
+            /* Ссылки */
+            a {
+                color: #000 !important;
+                text-decoration: underline;
+                background: transparent !important;
+            }
+
+            /* Списки */
+            ul, ol {
+                margin-left: 20px !important;
+            }
+            li {
+                margin-bottom: 5px !important;
+            }
+
+            /* Бордеры - черные линии для разделения */
+            [class*="border"] {
+                border: 1px solid #000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // База данных упражнений
+        const exerciseLibrary = {
+            // SMR (Самомиофасциальное расслабление)
+            smr_upper_trap: {
+                name: "МФР Верхняя трапеция",
+                desc: "Расслабление верхней части трапециевидной мышцы с помощью массажного мяча",
+                steps: [
+                    "Лягте на спину, поместите массажный мяч под верхнюю трапецию (между шеей и плечом)",
+                    "Медленно поворачивайте голову в стороны, прокатывая область",
+                    "Задержитесь на болезненных точках на 30-60 секунд",
+                    "Выполняйте 1-2 минуты на каждую сторону"
+                ]
+            },
+            smr_pecs: {
+                name: "МФР Грудные мышцы",
+                desc: "Расслабление большой грудной мышцы массажным мячом",
+                steps: [
+                    "Лягте лицом вниз, поместите мяч под грудную мышцу (ниже ключицы)",
+                    "Медленно прокатывайте область, двигая руку вперед-назад",
+                    "Задержитесь на напряженных участках 30-60 секунд",
+                    "Избегайте давления на костные структуры",
+                    "Выполняйте 1-2 минуты на каждую сторону"
+                ]
+            },
+            smr_lats: {
+                name: "МФР Широчайшие мышцы спины",
+                desc: "Расслабление широчайших мышц роллом",
+                steps: [
+                    "Лягте на бок, вытяните руку над головой",
+                    "Поместите ролл под подмышку (на широчайшую мышцу)",
+                    "Медленно прокатывайте от подмышки до середины спины",
+                    "Задержитесь на напряженных точках 30-60 секунд",
+                    "Выполняйте 1-2 минуты на каждую сторону"
+                ]
+            },
+            smr_psoas: {
+                name: "МФР Поясничная мышца (Psoas)",
+                desc: "Расслабление подвздошно-поясничной мышцы массажным мячом",
+                steps: [
+                    "Лягте лицом вниз, поместите мяч в область между тазовой костью и пупком",
+                    "Перенесите вес тела на мяч, расслабьте живот",
+                    "Медленно двигайте бедрами вперед-назад",
+                    "Задержитесь на напряженных участках 30-90 секунд",
+                    "Дышите глубоко и медленно",
+                    "Выполняйте 1-2 минуты на каждую сторону"
+                ]
+            },
+            smr_quads: {
+                name: "МФР Квадрицепсы",
+                desc: "Расслабление передней поверхности бедра роллом",
+                steps: [
+                    "Примите положение планки на предплечьях, ролл под бедрами",
+                    "Медленно прокатывайте от таза до колена",
+                    "Поворачивайте ноги внутрь и наружу для проработки всех головок",
+                    "Задержитесь на болезненных точках 30-60 секунд",
+                    "Выполняйте 1-2 минуты на каждую ногу"
+                ]
+            },
+            smr_tfl: {
+                name: "МФР Тензор широкой фасции (TFL)",
+                desc: "Расслабление латеральной части бедра роллом",
+                steps: [
+                    "Лягте на бок, поместите ролл под верхнюю часть бедра (ниже тазовой кости)",
+                    "Медленно прокатывайте область от таза вниз на 10-15 см",
+                    "Задержитесь на напряженных точках 30-60 секунд",
+                    "Не прокатывайте непосредственно IT-band (болезненно)",
+                    "Выполняйте 1-2 минуты на каждую сторону"
+                ]
+            },
+            smr_calves: {
+                name: "МФР Икроножные мышцы",
+                desc: "Расслабление икр роллом",
+                steps: [
+                    "Сядьте на пол, поместите ролл под икры",
+                    "Поднимите таз, перенесите вес на икры",
+                    "Медленно прокатывайте от ахиллова сухожилия до подколенной ямки",
+                    "Поворачивайте стопы внутрь и наружу",
+                    "Задержитесь на напряженных точках 30-60 секунд",
+                    "Выполняйте 1-2 минуты на каждую ногу"
+                ]
+            },
+            smr_adductors: {
+                name: "МФР Приводящие мышцы бедра",
+                desc: "Расслабление внутренней поверхности бедра роллом",
+                steps: [
+                    "Лягте лицом вниз, отведите одну ногу в сторону (согнута в колене)",
+                    "Поместите ролл под внутреннюю часть бедра",
+                    "Медленно прокатывайте от паха до колена",
+                    "Задержитесь на болезненных точках 30-60 секунд",
+                    "Выполняйте 1-2 минуты на каждую ногу"
+                ]
+            },
+
+            // Растяжка (Lengthening)
+            stretch_neck: {
+                name: "Растяжка шеи (боковая)",
+                desc: "Статическая растяжка верхней трапеции и боковых мышц шеи",
+                steps: [
+                    "Сядьте или встаньте прямо, опустите плечи вниз",
+                    "Наклоните голову к правому плечу",
+                    "Положите правую руку на левую сторону головы, мягко усиливая растяжку",
+                    "Почувствуйте растяжение по левой стороне шеи",
+                    "Удерживайте 30-60 секунд",
+                    "Повторите на другую сторону"
+                ]
+            },
+            stretch_pec_doorway: {
+                name: "Растяжка грудных в дверном проеме",
+                desc: "Статическая растяжка большой и малой грудных мышц",
+                steps: [
+                    "Встаньте в дверном проеме, поднимите руку на 90°, согните локоть на 90°",
+                    "Поместите предплечье на дверной косяк",
+                    "Сделайте небольшой шаг вперед, поворачивая корпус от руки",
+                    "Почувствуйте растяжение в груди и передней части плеча",
+                    "Удерживайте 30-60 секунд на каждую сторону",
+                    "Повторите с рукой выше (120°) и ниже (60°) для разных волокон"
+                ]
+            },
+            stretch_hip_flexor: {
+                name: "Растяжка сгибателей бедра (коленопреклоненная)",
+                desc: "Статическая растяжка подвздошно-поясничной мышцы",
+                steps: [
+                    "Встаньте на одно колено (выпад), другая нога впереди (90° в колене)",
+                    "Напрягите ягодицы задней ноги, подкрутите таз назад (задний наклон)",
+                    "Медленно переместите бедра вперед, сохраняя вертикальное положение корпуса",
+                    "Поднимите руку на стороне задней ноги вверх и наклонитесь в противоположную сторону",
+                    "Почувствуйте растяжение в передней части бедра и паха",
+                    "Удерживайте 30-60 секунд на каждую сторону"
+                ]
+            },
+            stretch_quad_standing: {
+                name: "Растяжка квадрицепса стоя",
+                desc: "Статическая растяжка прямой мышцы бедра",
+                steps: [
+                    "Встаньте на одну ногу, держитесь за опору для баланса",
+                    "Согните другое колено, возьмитесь рукой за стопу сзади",
+                    "Подтяните пятку к ягодице, держите колени вместе",
+                    "Подкрутите таз назад (задний наклон) для усиления растяжки",
+                    "Сохраняйте вертикальное положение корпуса",
+                    "Удерживайте 30-60 секунд на каждую ногу"
+                ]
+            },
+            stretch_calf_wall: {
+                name: "Растяжка икр у стены",
+                desc: "Статическая растяжка икроножной и камбаловидной мышц",
+                steps: [
+                    "Встаньте лицом к стене, одна нога впереди, другая сзади",
+                    "Для икроножной: заднюю ногу держите прямой, пятка на полу",
+                    "Наклонитесь вперед к стене, сгибая переднее колено",
+                    "Почувствуйте растяжение в икре задней ноги",
+                    "Удерживайте 30-60 секунд",
+                    "Для камбаловидной: согните заднее колено, пятка на полу",
+                    "Удерживайте еще 30 секунд, повторите на другую ногу"
+                ]
+            },
+            stretch_lat_standing: {
+                name: "Растяжка широчайших стоя",
+                desc: "Статическая растяжка широчайших мышц спины",
+                steps: [
+                    "Встаньте прямо, вытяните обе руки над головой",
+                    "Возьмитесь правой рукой за левое запястье",
+                    "Потяните левую руку вправо, наклоняя корпус в сторону",
+                    "Почувствуйте растяжение по левой стороне спины",
+                    "Держите бедра на месте, не наклоняйте таз",
+                    "Удерживайте 30-60 секунд на каждую сторону"
+                ]
+            },
+
+            // Активация (Activation)
+            activate_chin_tuck: {
+                name: "Подбородочные подтягивания",
+                desc: "Изолированная активация глубоких сгибателей шеи",
+                steps: [
+                    "Лягте на спину, колени согнуты, стопы на полу",
+                    "Слегка кивните подбородком вниз (как будто делаете двойной подбородок)",
+                    "Не поднимайте голову - движение только в верхнем отделе шеи",
+                    "Почувствуйте напряжение глубоких мышц передней части шеи",
+                    "Удерживайте 5-10 секунд",
+                    "Выполните 2-3 подхода по 10-15 повторений"
+                ]
+            },
+            activate_ytw: {
+                name: "Упражнения Y-T-W",
+                desc: "Активация нижней и средней трапеции, ромбовидных мышц",
+                steps: [
+                    "Лягте лицом вниз на наклонной скамье или на полу",
+                    "Y: Вытяните руки вперед под углом 45° (V-образно), большие пальцы вверх",
+                    "Поднимите руки вверх, сводя лопатки. Удержите 2 сек. 10-12 повторений",
+                    "T: Вытяните руки в стороны на 90°, большие пальцы вверх",
+                    "Поднимите руки, сводя лопатки вместе. Удержите 2 сек. 10-12 повторений",
+                    "W: Согните локти на 90°, руки на уровне плеч",
+                    "Поднимите локти назад, сводя лопатки. Удержите 2 сек. 10-12 повторений",
+                    "Выполните 2-3 подхода каждого варианта"
+                ]
+            },
+            activate_glute_bridge: {
+                name: "Ягодичный мостик",
+                desc: "Изолированная активация большой ягодичной мышцы",
+                steps: [
+                    "Лягте на спину, колени согнуты, стопы на ширине таза, руки вдоль тела",
+                    "Напрягите живот (подтяните пупок к позвоночнику)",
+                    "Сожмите ягодицы и поднимите таз вверх",
+                    "Поднимайтесь до прямой линии от колен до плеч",
+                    "НЕ прогибайте поясницу - работают только ягодицы",
+                    "Удерживайте верхнюю точку 2-3 секунды, сжимая ягодицы",
+                    "Медленно опуститесь. Выполните 2-3 подхода по 12-15 повторений"
+                ]
+            },
+            activate_plank_rkc: {
+                name: "Планка RKC",
+                desc: "Активация глубоких мышц кора с максимальным напряжением",
+                steps: [
+                    "Примите положение планки на предплечьях",
+                    "Локти под плечами, тело в прямой линии",
+                    "Максимально напрягите ягодицы",
+                    "Втяните живот (как будто готовитесь к удару)",
+                    "Сожмите квадрицепсы (выпрямите колени максимально)",
+                    "Тяните локти к стопам (не двигая их), создавая напряжение",
+                    "Дышите верхней частью грудной клетки",
+                    "Удерживайте 10-20 секунд максимального напряжения",
+                    "Выполните 3-5 подходов"
+                ]
+            },
+            activate_clamshell: {
+                name: "Ракушка (Clamshell)",
+                desc: "Изолированная активация средней ягодичной мышцы",
+                steps: [
+                    "Лягте на бок, колени согнуты на 90°, стопы вместе",
+                    "Голова на нижней руке, верхняя рука на бедре для контроля",
+                    "Держите стопы вместе, поднимите верхнее колено вверх",
+                    "НЕ поворачивайте таз назад - движение только в тазобедренном суставе",
+                    "Почувствуйте работу ягодиц сбоку (средняя ягодичная)",
+                    "Удержите 1-2 секунды в верхней точке",
+                    "Медленно опустите. Выполните 2-3 подхода по 15-20 повторений на каждую сторону"
+                ]
+            },
+            activate_tibialis: {
+                name: "Подъем носков (активация передней большеберцовой)",
+                desc: "Активация передней большеберцовой мышцы",
+                steps: [
+                    "Сядьте на стул, стопы на полу на ширине таза",
+                    "Держите пятки на полу, поднимите носки вверх максимально высоко",
+                    "Почувствуйте напряжение в передней части голени",
+                    "Удержите 2 секунды в верхней точке",
+                    "Медленно опустите носки на пол",
+                    "Выполните 2-3 подхода по 15-20 повторений",
+                    "Для усложнения: добавьте вес на колени или выполняйте стоя"
+                ]
+            },
+            activate_side_lying_hip_abd: {
+                name: "Отведение бедра лежа на боку",
+                desc: "Активация средней ягодичной и тензора широкой фасции",
+                steps: [
+                    "Лягте на бок, нижняя нога слегка согнута для стабильности",
+                    "Верхняя нога прямая, стопа в нейтральном положении",
+                    "Медленно поднимите верхнюю ногу вверх на 30-45°",
+                    "Держите бедро слегка развернутым наружу (большой палец вверх)",
+                    "НЕ наклоняйте таз назад",
+                    "Удержите 1-2 секунды в верхней точке",
+                    "Медленно опустите. Выполните 2-3 подхода по 12-15 повторений"
+                ]
+            },
+
+            // Интеграция (Integration)
+            integrate_squat_to_stand: {
+                name: "Приседания со стулом",
+                desc: "Функциональный паттерн приседания с контролем",
+                steps: [
+                    "Встаньте спиной к стулу, ноги на ширине плеч",
+                    "Руки вытяните вперед для баланса",
+                    "Отведите бедра назад, сгибая колени",
+                    "Медленно опуститесь на стул (контролируемо, не падайте)",
+                    "Коснитесь ягодицами стула (можно не садиться полностью)",
+                    "Оттолкнитесь пятками, встаньте, напрягая ягодицы",
+                    "Держите колени на линии стоп (не заваливайте внутрь)",
+                    "Выполните 2-3 подхода по 10-15 повторений"
+                ]
+            },
+            integrate_split_squat: {
+                name: "Сплит-приседания",
+                desc: "Односторонний функциональный паттерн нижней части тела",
+                steps: [
+                    "Встаньте в позицию разножки (одна нога впереди, другая сзади)",
+                    "Передняя стопа полностью на полу, задняя на носке",
+                    "Руки на бедрах или вытянуты для баланса",
+                    "Опуститесь вниз, сгибая оба колена",
+                    "Переднее колено над лодыжкой, заднее опускается к полу",
+                    "Держите корпус вертикально, не наклоняйтесь вперед",
+                    "Оттолкнитесь передней пяткой, вернитесь в исходное положение",
+                    "Выполните 2-3 подхода по 10-12 повторений на каждую ногу"
+                ]
+            },
+            integrate_lunge_multiplanar: {
+                name: "Выпады в трех плоскостях",
+                desc: "Многоплоскостные функциональные выпады",
+                steps: [
+                    "Сагиттальная плоскость: Шагните вперед, опуститесь в выпад, вернитесь. 8 повторений",
+                    "Фронтальная плоскость: Шагните в сторону, согните боковую ногу, вернитесь. 8 повторений",
+                    "Поперечная плоскость: Шагните назад по диагонали (крест-накрест), выпад, вернитесь. 8 повторений",
+                    "Держите корпус прямо во всех плоскостях",
+                    "Колено передней ноги на линии стопы",
+                    "Выполните 2-3 подхода на каждую ногу"
+                ]
+            },
+            integrate_single_leg_balance: {
+                name: "Баланс на одной ноге",
+                desc: "Стабилизация и проприоцепция",
+                steps: [
+                    "Встаньте на одну ногу, другую согните в колене (колено вперед)",
+                    "Руки на бедрах или вытянуты в стороны для баланса",
+                    "Держите опорную ногу слегка согнутой (не блокируйте колено)",
+                    "Напрягите ягодицы и кор для стабильности",
+                    "Удерживайте равновесие 30-60 секунд",
+                    "Прогрессия: закройте глаза, стойте на нестабильной поверхности",
+                    "Или добавьте движения руками (жим вверх, разведения)",
+                    "Выполните 2-3 подхода на каждую ногу"
+                ]
+            },
+            integrate_deadlift: {
+                name: "Румынская становая тяга",
+                desc: "Функциональный паттерн тазового наклона (hip hinge)",
+                steps: [
+                    "Встаньте прямо, ноги на ширине таза, гантели в руках (или без веса)",
+                    "Слегка согните колени, зафиксируйте этот угол",
+                    "Наклонитесь вперед от бедер, отводя таз назад",
+                    "Спина прямая (не круглите), гантели скользят по ногам",
+                    "Опускайтесь до растяжения задней поверхности бедра",
+                    "Почувствуйте работу ягодиц и бицепсов бедра",
+                    "Напрягите ягодицы, вернитесь в исходное положение (толкайте таз вперед)",
+                    "Выполните 2-3 подхода по 10-12 повторений"
+                ]
+            },
+            integrate_squat_jump: {
+                name: "Прыжковые приседания",
+                desc: "Плиометрическая интеграция нижней части тела",
+                steps: [
+                    "Встаньте, ноги на ширине плеч, руки вдоль тела",
+                    "Опуститесь в присед (бедра параллельно полу)",
+                    "Мощно оттолкнитесь, выпрыгните вверх",
+                    "Руки взмахните вверх для инерции",
+                    "Приземлитесь мягко на всю стопу, сразу согните колени",
+                    "Контролируйте приземление (колени не заваливаются внутрь)",
+                    "Сразу переходите в следующий присед",
+                    "Выполните 2-3 подхода по 8-10 повторений"
+                ]
+            },
+            integrate_pushup_plus: {
+                name: "Отжимания плюс (Push-up Plus)",
+                desc: "Интеграция передней зубчатой мышцы и стабилизаторов лопатки",
+                steps: [
+                    "Примите положение планки (высокая или на коленях)",
+                    "Выполните обычное отжимание (опуститесь и поднимитесь)",
+                    "В верхней точке дополнительно вытолкните плечи вперед-вверх",
+                    "Округлите верхнюю часть спины, разведите лопатки максимально",
+                    "Почувствуйте работу мышц вокруг лопаток (передняя зубчатая)",
+                    "Вернитесь в нейтральную позицию планки",
+                    "Выполните 2-3 подхода по 8-12 повторений"
+                ]
+            },
+            integrate_rotation_chop: {
+                name: "Рубка с вращением",
+                desc: "Функциональная интеграция вращательных движений кора",
+                steps: [
+                    "Встаньте, ноги шире плеч, держите набивной мяч или гантель обеими руками",
+                    "Поднимите мяч к правому плечу (высокая позиция)",
+                    "Поверните корпус вправо, ноги стабильны",
+                    "Рубящим движением опустите мяч по диагонали к левому бедру",
+                    "Поворачивайте корпус, сгибайте колени (присед)",
+                    "Вернитесь в исходное положение, напрягая кор",
+                    "Выполните 10-12 повторений на одну сторону, затем смените",
+                    "Выполните 2-3 подхода"
+                ]
+            }
+        };
+
+        // Алгоритм определения синдромов
+        const syndromeLogic = {
+            upper_crossed: {
+                triggers: [
+                    'forward_head', 'rounded_shoulders', 'arms_fall', 
+                    'neck_flex_limit', 'apley_fail'
+                ],
+                exercises: {
+                    inhibit: ['smr_upper_trap', 'smr_pecs', 'smr_lats'],
+                    lengthen: ['stretch_neck', 'stretch_pec_doorway', 'stretch_lat_standing'],
+                    activate: ['activate_chin_tuck', 'activate_ytw'],
+                    integrate: ['integrate_pushup_plus', 'integrate_rotation_chop']
+                }
+            },
+            lower_crossed: {
+                triggers: [
+                    'hyperlordosis', 'arch_low_back', 'thomas_psoas', 
+                    'thomas_rectus', 'forward_lean_excessive'
+                ],
+                exercises: {
+                    inhibit: ['smr_psoas', 'smr_quads', 'smr_lats'],
+                    lengthen: ['stretch_hip_flexor', 'stretch_quad_standing', 'stretch_lat_standing'],
+                    activate: ['activate_glute_bridge', 'activate_plank_rkc'],
+                    integrate: ['integrate_deadlift', 'integrate_squat_to_stand', 'integrate_split_squat']
+                }
+            },
+            pronation_distortion: {
+                triggers: [
+                    'knee_valgus', 'feet_turn_out', 'flat_feet', 
+                    'heels_rise', 'knee_wall_fail', 'thomas_tfl'
+                ],
+                exercises: {
+                    inhibit: ['smr_tfl', 'smr_calves', 'smr_adductors'],
+                    lengthen: ['stretch_calf_wall', 'stretch_hip_flexor'],
+                    activate: ['activate_clamshell', 'activate_tibialis', 'activate_side_lying_hip_abd'],
+                    integrate: ['integrate_single_leg_balance', 'integrate_lunge_multiplanar', 'integrate_squat_to_stand']
+                }
+            }
+        };
+
+        // Компонент модального окна
+        function Modal({ isOpen, onClose, title, content }) {
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 no-print" onClick={onClose}>
+                    <div className="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto slide-up border border-gray-700" onClick={(e) => e.stopPropagation()}>
+                        <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 flex justify-between items-center">
+                            <h3 className="text-2xl font-bold text-orange-500">{title}</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                        </div>
+                        <div className="p-6">
+                            {content}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Компонент информационной подсказки
+        function InfoButton({ title, howTo, whatToLook }) {
+            const [isOpen, setIsOpen] = useState(false);
+
+            const content = (
+                <div className="space-y-4">
+                    <div>
+                        <h4 className="font-semibold text-lg mb-2 text-orange-400">Как проводить тест:</h4>
+                        <p className="text-gray-300">{howTo}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-lg mb-2 text-orange-400">На что обратить внимание:</h4>
+                        <p className="text-gray-300">{whatToLook}</p>
+                    </div>
+                </div>
+            );
+
+            return (
+                <>
+                    <button onClick={() => setIsOpen(true)} className="ml-2 text-orange-500 hover:text-orange-400 text-sm">
+                        <i className="fas fa-question-circle"></i>
+                    </button>
+                    <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title={title} content={content} />
+                </>
+            );
+        }
+
+        // Главный компонент приложения
+        function App() {
+            const [step, setStep] = useState(0);
+            const [assessmentData, setAssessmentData] = useState({
+                redFlags: [],
+                static: [],
+                dynamic: [],
+                mobility: []
+            });
+            const [selectedExercise, setSelectedExercise] = useState(null);
+
+            const updateAssessment = (category, value) => {
+                setAssessmentData(prev => ({
+                    ...prev,
+                    [category]: prev[category].includes(value)
+                        ? prev[category].filter(v => v !== value)
+                        : [...prev[category], value]
+                }));
+            };
+
+            const hasRedFlags = assessmentData.redFlags.length > 0;
+
+            // Определение синдромов
+            const detectSyndromes = () => {
+                const allFindings = [...assessmentData.static, ...assessmentData.dynamic, ...assessmentData.mobility];
+                const detected = [];
+
+                Object.entries(syndromeLogic).forEach(([key, syndrome]) => {
+                    const matches = syndrome.triggers.filter(t => allFindings.includes(t));
+                    if (matches.length >= 2) {
+                        detected.push({ key, ...syndrome, matchCount: matches.length });
+                    }
+                });
+
+                return detected;
+            };
+
+            const renderExerciseCard = (exerciseKey) => {
+                const ex = exerciseLibrary[exerciseKey];
+                if (!ex) return null;
+
+                return (
+                    <div key={exerciseKey} 
+                         className="bg-gray-700 p-4 rounded-lg hover:bg-gray-600 cursor-pointer transition-all print-break border border-gray-600"
+                         onClick={() => setSelectedExercise(ex)}>
+                        <h4 className="font-semibold text-white mb-2">{ex.name}</h4>
+                        <p className="text-gray-300 text-sm">{ex.desc}</p>
+                    </div>
+                );
+            };
+
+            const exerciseModalContent = selectedExercise ? (
+                <div className="space-y-4">
+                    <p className="text-gray-300">{selectedExercise.desc}</p>
+                    <div>
+                        <h4 className="font-semibold text-lg mb-3 text-orange-400">Пошаговая инструкция:</h4>
+                        <ol className="space-y-2">
+                            {selectedExercise.steps.map((step, idx) => (
+                                <li key={idx} className="text-gray-300">
+                                    <span className="font-semibold text-orange-500">{idx + 1}.</span> {step}
+                                </li>
+                            ))}
+                        </ol>
+                    </div>
+                </div>
+            ) : null;
+
+            // Шаг 0: Intro
+            if (step === 0) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 fade-in">
+                        <div className="text-center max-w-2xl">
+                            <h1 className="text-6xl font-bold mb-4">
+                                ODA <span className="text-orange-500">PRO</span>
+                            </h1>
+                            <p className="text-3xl text-gray-300 mb-12">Body Balance System</p>
+                            <button 
+                                onClick={() => setStep(1)}
+                                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-12 py-4 rounded-lg text-xl transition-all shadow-lg">
+                                Начать оценку
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Шаг 1: Safety Screening
+            if (step === 1) {
+                return (
+                    <div className="container mx-auto px-4 py-8 max-w-4xl fade-in">
+                        <h2 className="text-3xl font-bold mb-2">Шаг 1: Скрининг безопасности</h2>
+                        <p className="text-gray-400 mb-6">Проверка противопоказаний</p>
+
+                        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 mb-6">
+                            <h3 className="text-xl font-semibold mb-4 text-orange-500">
+                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                Критические признаки
+                            </h3>
+                            <div className="space-y-3">
+                                {[
+                                    { key: 'acute_pain', label: 'Острая боль при движении' },
+                                    { key: 'recent_trauma', label: 'Недавняя травма/операция (менее 6 месяцев)' },
+                                    { key: 'numbness', label: 'Онемение/потеря чувствительности' }
+                                ].map(item => (
+                                    <label key={item.key} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-700 p-3 rounded">
+                                        <input 
+                                            type="checkbox"
+                                            checked={assessmentData.redFlags.includes(item.key)}
+                                            onChange={() => updateAssessment('redFlags', item.key)}
+                                            className="w-5 h-5 text-orange-500"
+                                        />
+                                        <span className="text-lg">{item.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {hasRedFlags && (
+                            <div className="bg-red-900 bg-opacity-30 border border-red-500 p-6 rounded-lg mb-6">
+                                <h3 className="text-xl font-semibold text-red-400 mb-2">
+                                    <i className="fas fa-hand-paper mr-2"></i>
+                                    ВНИМАНИЕ: Обнаружены противопоказания
+                                </h3>
+                                <p className="text-gray-300">
+                                    Необходима консультация врача перед началом коррекционных упражнений. 
+                                    Не продолжайте оценку без медицинского разрешения.
+                                </p>
+                            </div>
+                        )}
+
+                        {!hasRedFlags && (
+                            <div className="bg-green-900 bg-opacity-20 border border-green-500 p-4 rounded-lg mb-6">
+                                <p className="text-green-400 text-lg">
+                                    <i className="fas fa-check-circle mr-2"></i>
+                                    Противопоказаний не обнаружено
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="flex justify-between">
+                            <button onClick={() => setStep(0)} className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">
+                                Назад
+                            </button>
+                            <button 
+                                onClick={() => setStep(2)} 
+                                disabled={hasRedFlags}
+                                className={`px-6 py-3 rounded-lg font-semibold ${
+                                    hasRedFlags 
+                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+                                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                                }`}>
+                                Продолжить
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Шаг 2: Static Assessment
+            if (step === 2) {
+                const assessmentGroups = [
+                    {
+                        title: 'Голова и плечи',
+                        items: [
+                            { 
+                                key: 'forward_head', 
+                                label: 'Голова выдвинута вперед',
+                                howTo: 'Наблюдайте за клиентом сбоку в естественной позе стоя. Мысленно проведите вертикальную линию от уха вниз.',
+                                whatToLook: 'Ухо должно быть над плечом. Если ухо впереди плеча - положительный тест (forward head posture).'
+                            },
+                            { 
+                                key: 'rounded_shoulders', 
+                                label: 'Округлые плечи',
+                                howTo: 'Наблюдайте сбоку и спереди. Обратите внимание на положение плеч относительно грудной клетки.',
+                                whatToLook: 'Плечи выдвинуты вперед, грудь "закрыта", лопатки разведены в стороны. Ладони развернуты назад.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Таз и позвоночник',
+                        items: [
+                            { 
+                                key: 'hyperlordosis', 
+                                label: 'Гиперлордоз (передний наклон таза)',
+                                howTo: 'Наблюдайте сбоку. Оцените изгиб поясницы и положение таза.',
+                                whatToLook: 'Увеличенный изгиб в пояснице, таз наклонен вперед, ягодицы выступают назад, живот выпячен вперед.'
+                            },
+                            { 
+                                key: 'flat_back', 
+                                label: 'Плоская спина (задний наклон таза)',
+                                howTo: 'Наблюдайте сбоку. Оцените естественные изгибы позвоночника.',
+                                whatToLook: 'Уменьшенный поясничный изгиб, таз подкручен назад, ягодицы "поджаты", верхняя часть спины может быть округлена.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Нижняя часть тела',
+                        items: [
+                            { 
+                                key: 'knee_valgus', 
+                                label: 'Вальгус коленей (X-образные ноги)',
+                                howTo: 'Наблюдайте спереди. Попросите клиента встать естественно, стопы на ширине таза.',
+                                whatToLook: 'Колени направлены внутрь, сближены, расстояние между стопами больше, чем между коленями.'
+                            },
+                            { 
+                                key: 'flat_feet', 
+                                label: 'Плоскостопие/пронация',
+                                howTo: 'Наблюдайте за сводом стопы с внутренней стороны при стоянии.',
+                                whatToLook: 'Опущение внутреннего свода стопы, стопа "заваливается" внутрь, лодыжка смещена медиально.'
+                            }
+                        ]
+                    }
+                ];
+
+                return (
+                    <div className="container mx-auto px-4 py-8 max-w-5xl fade-in">
+                        <h2 className="text-3xl font-bold mb-2">Шаг 2: Статическая оценка</h2>
+                        <p className="text-gray-400 mb-6">Визуальный анализ осанки в покое</p>
+
+                        <div className="space-y-6 mb-8">
+                            {assessmentGroups.map((group, idx) => (
+                                <div key={idx} className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                    <h3 className="text-xl font-semibold mb-4 text-orange-500">{group.title}</h3>
+                                    <div className="space-y-3">
+                                        {group.items.map(item => (
+                                            <div key={item.key} className="flex items-center justify-between hover:bg-gray-700 p-3 rounded">
+                                                <label className="flex items-center space-x-3 cursor-pointer flex-1">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={assessmentData.static.includes(item.key)}
+                                                        onChange={() => updateAssessment('static', item.key)}
+                                                        className="w-5 h-5 text-orange-500"
+                                                    />
+                                                    <span className="text-lg">{item.label}</span>
+                                                </label>
+                                                <InfoButton 
+                                                    title={item.label}
+                                                    howTo={item.howTo}
+                                                    whatToLook={item.whatToLook}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-between">
+                            <button onClick={() => setStep(1)} className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">
+                                Назад
+                            </button>
+                            <button onClick={() => setStep(3)} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg">
+                                Продолжить
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Шаг 3: Dynamic Assessment (OHSA)
+            if (step === 3) {
+                const dynamicGroups = [
+                    {
+                        title: 'Вид спереди (Anterior)',
+                        items: [
+                            { 
+                                key: 'feet_turn_out', 
+                                label: 'Стопы разворачиваются наружу',
+                                howTo: 'Клиент выполняет 5 приседаний со штангой над головой (PVC pipe). Наблюдайте за стопами.',
+                                whatToLook: 'Стопы разворачиваются наружу (утиная походка) во время приседания. Указывает на слабость средней ягодичной или напряжение латеральных структур бедра.'
+                            },
+                            { 
+                                key: 'knee_valgus', 
+                                label: 'Колени заваливаются внутрь',
+                                howTo: 'Наблюдайте за траекторией коленей во время приседания.',
+                                whatToLook: 'Колени двигаются медиально (к средней линии) во время спуска. Признак слабости отводящих мышц бедра и/или напряжения приводящих.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Вид сбоку (Lateral)',
+                        items: [
+                            { 
+                                key: 'forward_lean_excessive', 
+                                label: 'Избыточный наклон вперед',
+                                howTo: 'Наблюдайте за углом туловища относительно вертикали.',
+                                whatToLook: 'Корпус наклоняется вперед более чем на 20-30°. Указывает на слабость ягодиц, напряжение сгибателей бедра или ограничение подвижности голеностопа.'
+                            },
+                            { 
+                                key: 'arch_low_back', 
+                                label: 'Поясница прогибается (лордоз)',
+                                howTo: 'Наблюдайте за поясничным отделом позвоночника во время спуска.',
+                                whatToLook: 'Увеличение изгиба в пояснице, таз наклоняется вперед (anterior tilt). Напряжение сгибателей бедра и слабость кора.'
+                            },
+                            { 
+                                key: 'arms_fall', 
+                                label: 'Руки падают вперед',
+                                howTo: 'Наблюдайте за положением PVC pipe над головой.',
+                                whatToLook: 'Штанга смещается вперед, руки не остаются вертикально над головой. Напряжение широчайших и грудных, слабость нижней трапеции.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Вид сзади (Posterior)',
+                        items: [
+                            { 
+                                key: 'heels_rise', 
+                                label: 'Пятки отрываются от пола',
+                                howTo: 'Наблюдайте за стопами сзади во время приседания.',
+                                whatToLook: 'Пятки поднимаются, вес переносится на носки. Ограничение подвижности голеностопного сустава (икроножная/камбаловидная мышцы).'
+                            },
+                            { 
+                                key: 'asymmetric_shift', 
+                                label: 'Асимметричное смещение',
+                                howTo: 'Наблюдайте за тазом и туловищем сзади.',
+                                whatToLook: 'Смещение веса на одну сторону, таз или плечи отклоняются латерально. Односторонняя слабость/дисбаланс ягодичных мышц.'
+                            }
+                        ]
+                    }
+                ];
+
+                return (
+                    <div className="container mx-auto px-4 py-8 max-w-5xl fade-in">
+                        <h2 className="text-3xl font-bold mb-2">Шаг 3: Динамическая оценка</h2>
+                        <p className="text-gray-400 mb-6">Overhead Squat Assessment (OHSA)</p>
+
+                        <div className="bg-blue-900 bg-opacity-20 border border-blue-500 p-4 rounded-lg mb-6">
+                            <p className="text-blue-300">
+                                <i className="fas fa-info-circle mr-2"></i>
+                                Клиент выполняет 5 приседаний с PVC pipe над головой. Наблюдайте с трех ракурсов.
+                            </p>
+                        </div>
+
+                        <div className="space-y-6 mb-8">
+                            {dynamicGroups.map((group, idx) => (
+                                <div key={idx} className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                    <h3 className="text-xl font-semibold mb-4 text-orange-500">{group.title}</h3>
+                                    <div className="space-y-3">
+                                        {group.items.map(item => (
+                                            <div key={item.key} className="flex items-center justify-between hover:bg-gray-700 p-3 rounded">
+                                                <label className="flex items-center space-x-3 cursor-pointer flex-1">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={assessmentData.dynamic.includes(item.key)}
+                                                        onChange={() => updateAssessment('dynamic', item.key)}
+                                                        className="w-5 h-5 text-orange-500"
+                                                    />
+                                                    <span className="text-lg">{item.label}</span>
+                                                </label>
+                                                <InfoButton 
+                                                    title={item.label}
+                                                    howTo={item.howTo}
+                                                    whatToLook={item.whatToLook}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-between">
+                            <button onClick={() => setStep(2)} className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">
+                                Назад
+                            </button>
+                            <button onClick={() => setStep(4)} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg">
+                                Продолжить
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Шаг 4: Mobility & Special Tests
+            if (step === 4) {
+                const mobilityGroups = [
+                    {
+                        title: 'Шея и плечи',
+                        items: [
+                            { 
+                                key: 'neck_flex_limit', 
+                                label: 'Ограничение сгибания шеи (<45°)',
+                                howTo: 'Попросите клиента наклонить подбородок к груди, стоя прямо.',
+                                whatToLook: 'Подбородок не достает до груди или ограничение <45°. Напряжение верхней трапеции, разгибателей шеи.'
+                            },
+                            { 
+                                key: 'apley_fail', 
+                                label: 'Тест Apley Scratch (провал)',
+                                howTo: 'Тест 1: Рука через верх, пытается дотянуться до противоположной лопатки. Тест 2: Рука снизу за спину, пытается дотянуться до противоположной лопатки.',
+                                whatToLook: 'Не может дотянуться до лопатки с любой стороны. Ограничение подвижности плечевого сустава, капсулы плеча.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Тазобедренный сустав (Тест Томаса)',
+                        items: [
+                            { 
+                                key: 'thomas_psoas', 
+                                label: 'Напряжение подвздошно-поясничной (бедро приподнято)',
+                                howTo: 'Клиент лежит на краю стола, одна нога подтянута к груди, другая свисает. Наблюдайте за свисающей ногой.',
+                                whatToLook: 'Бедро свисающей ноги НЕ касается стола, остается приподнятым (>0-15°). Укорочение iliopsoas.'
+                            },
+                            { 
+                                key: 'thomas_rectus', 
+                                label: 'Напряжение прямой мышцы бедра (колено разгибается)',
+                                howTo: 'В том же положении (тест Томаса) наблюдайте за коленом свисающей ноги.',
+                                whatToLook: 'Колено НЕ сгибается до 80-90°, остается разогнутым. Укорочение rectus femoris (двусуставная мышца).'
+                            },
+                            { 
+                                key: 'thomas_tfl', 
+                                label: 'Напряжение TFL (бедро отводится)',
+                                howTo: 'В том же положении наблюдайте за отведением бедра в сторону.',
+                                whatToLook: 'Бедро отводится латерально (наружу) от средней линии. Укорочение tensor fasciae latae и IT-band.'
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Голеностоп и задняя цепь',
+                        items: [
+                            { 
+                                key: 'knee_wall_fail', 
+                                label: 'Тест Knee-to-Wall (<10см)',
+                                howTo: 'Клиент стоит лицом к стене, пятка на полу. Пытается коснуться коленом стены, не отрывая пятку.',
+                                whatToLook: 'Расстояние от пальцев до стены <10см, при котором колено касается стены. Ограничение дорсифлексии голеностопа.'
+                            },
+                            { 
+                                key: 'aslr_fail', 
+                                label: 'Active Straight Leg Raise (<80°)',
+                                howTo: 'Клиент лежит на спине, активно поднимает прямую ногу вверх (не сгибая колено). Другая нога прямая на столе.',
+                                whatToLook: 'Угол <80° от горизонтали. Напряжение задней поверхности бедра (бицепс бедра, полусухожильная), икр.'
+                            }
+                        ]
+                    }
+                ];
+
+                return (
+                    <div className="container mx-auto px-4 py-8 max-w-5xl fade-in">
+                        <h2 className="text-3xl font-bold mb-2">Шаг 4: Тесты подвижности</h2>
+                        <p className="text-gray-400 mb-6">Клинические тесты амплитуды движений</p>
+
+                        <div className="space-y-6 mb-8">
+                            {mobilityGroups.map((group, idx) => (
+                                <div key={idx} className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                    <h3 className="text-xl font-semibold mb-4 text-orange-500">{group.title}</h3>
+                                    <div className="space-y-3">
+                                        {group.items.map(item => (
+                                            <div key={item.key} className="flex items-center justify-between hover:bg-gray-700 p-3 rounded">
+                                                <label className="flex items-center space-x-3 cursor-pointer flex-1">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={assessmentData.mobility.includes(item.key)}
+                                                        onChange={() => updateAssessment('mobility', item.key)}
+                                                        className="w-5 h-5 text-orange-500"
+                                                    />
+                                                    <span className="text-lg">{item.label}</span>
+                                                </label>
+                                                <InfoButton 
+                                                    title={item.label}
+                                                    howTo={item.howTo}
+                                                    whatToLook={item.whatToLook}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-between">
+                            <button onClick={() => setStep(3)} className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg">
+                                Назад
+                            </button>
+                            <button onClick={() => setStep(5)} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg">
+                                Создать отчет
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Шаг 5: Report
+            if (step === 5) {
+                const syndromes = detectSyndromes();
+                const hasIssues = syndromes.length > 0;
+
+                return (
+                    <div className="container mx-auto px-4 py-8 max-w-6xl fade-in">
+                        <div className="flex justify-between items-center mb-6 no-print">
+                            <div>
+                                <h2 className="text-3xl font-bold mb-2">Отчет о балансе тела</h2>
+                                <p className="text-gray-400">Результаты оценки и коррекционная стратегия</p>
+                            </div>
+                            <button 
+                                onClick={() => window.print()}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2">
+                                <i className="fas fa-download"></i>
+                                <span>Сохранить PDF</span>
+                            </button>
+                        </div>
+
+                        {!hasIssues && (
+                            <div className="bg-green-900 bg-opacity-20 border-2 border-green-500 p-8 rounded-lg mb-8 text-center">
+                                <i className="fas fa-trophy text-6xl text-green-500 mb-4"></i>
+                                <h3 className="text-3xl font-bold text-green-400 mb-2">Идеальный результат!</h3>
+                                <p className="text-xl text-gray-300">
+                                    Дисфункций не обнаружено. Рекомендуется общая фитнес-программа для поддержания формы.
+                                </p>
+                            </div>
+                        )}
+
+                        {hasIssues && (
+                            <div>
+                                <div className="mb-8">
+                                    <h3 className="text-2xl font-bold mb-4 text-orange-500">Обнаруженные синдромы:</h3>
+                                    <div className="grid gap-4">
+                                        {syndromes.map((syndrome, idx) => (
+                                            <div key={idx} className="bg-gray-800 p-6 rounded-lg border-l-4 border-orange-500">
+                                                <h4 className="text-xl font-bold mb-2">
+                                                    {syndrome.key === 'upper_crossed' && 'Верхний перекрестный синдром (Upper Crossed Syndrome)'}
+                                                    {syndrome.key === 'lower_crossed' && 'Нижний перекрестный синдром (Lower Crossed Syndrome)'}
+                                                    {syndrome.key === 'pronation_distortion' && 'Синдром дисторсии пронации (Pronation Distortion Syndrome)'}
+                                                </h4>
+                                                <p className="text-gray-400">
+                                                    {syndrome.key === 'upper_crossed' && 'Дисбаланс мышц шеи, плеч и верхней части спины. Характеризуется выдвижением головы вперед, округлыми плечами и компенсаторными паттернами в грудном отделе позвоночника.'}
+                                                    {syndrome.key === 'lower_crossed' && 'Дисбаланс мышц таза, поясницы и бедер. Проявляется в виде увеличенного поясничного лордоза, переднего наклона таза и слабости ягодичных мышц.'}
+                                                    {syndrome.key === 'pronation_distortion' && 'Дисбаланс нижней конечности, влияющий на стопу, голеностоп, колено и бедро. Характеризуется заваливанием коленей внутрь, пронацией стоп и компенсаторными паттернами.'}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <h3 className="text-2xl font-bold mb-6 text-orange-500">
+                                    Коррекционная программа (4 фазы NASM CEx)
+                                </h3>
+
+                                {syndromes.map((syndrome, sIdx) => (
+                                    <div key={sIdx} className="mb-8 print-break">
+                                        <h4 className="text-xl font-bold mb-4 bg-gray-800 p-4 rounded-lg">
+                                            Программа для: {' '}
+                                            {syndrome.key === 'upper_crossed' && 'Верхний перекрестный синдром'}
+                                            {syndrome.key === 'lower_crossed' && 'Нижний перекрестный синдром'}
+                                            {syndrome.key === 'pronation_distortion' && 'Синдром дисторсии пронации'}
+                                        </h4>
+
+                                        <div className="space-y-6">
+                                            {/* Фаза 1: Inhibit */}
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <h5 className="text-lg font-bold mb-3 text-red-400">
+                                                    <i className="fas fa-circle mr-2"></i>
+                                                    Фаза 1: Торможение (Inhibit - SMR)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm">
+                                                    Снижение активности перенапряженных мышц с помощью самомиофасциального расслабления
+                                                </p>
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {syndrome.exercises.inhibit.map(ex => renderExerciseCard(ex))}
+                                                </div>
+                                            </div>
+
+                                            {/* Фаза 2: Lengthen */}
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <h5 className="text-lg font-bold mb-3 text-blue-400">
+                                                    <i className="fas fa-arrows-alt-h mr-2"></i>
+                                                    Фаза 2: Удлинение (Lengthen - Stretching)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm">
+                                                    Статическая растяжка укороченных мышц для увеличения амплитуды движения
+                                                </p>
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {syndrome.exercises.lengthen.map(ex => renderExerciseCard(ex))}
+                                                </div>
+                                            </div>
+
+                                            {/* Фаза 3: Activate */}
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <h5 className="text-lg font-bold mb-3 text-green-400">
+                                                    <i className="fas fa-bolt mr-2"></i>
+                                                    Фаза 3: Активация (Activate - Isolation)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm">
+                                                    Изолированное укрепление недоактивных/ослабленных мышц
+                                                </p>
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {syndrome.exercises.activate.map(ex => renderExerciseCard(ex))}
+                                                </div>
+                                            </div>
+
+                                            {/* Фаза 4: Integrate */}
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <h5 className="text-lg font-bold mb-3 text-purple-400">
+                                                    <i className="fas fa-running mr-2"></i>
+                                                    Фаза 4: Интеграция (Integrate - Functional)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm">
+                                                    Функциональные движения для восстановления правильных двигательных паттернов
+                                                </p>
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {syndrome.exercises.integrate.map(ex => renderExerciseCard(ex))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <div className="bg-blue-900 bg-opacity-20 border border-blue-500 p-6 rounded-lg mt-8">
+                                    <h4 className="font-bold text-lg mb-2 text-blue-400">
+                                        <i className="fas fa-lightbulb mr-2"></i>
+                                        Рекомендации по выполнению
+                                    </h4>
+                                    <ul className="space-y-2 text-gray-300">
+                                        <li><strong>Частота:</strong> 3-5 раз в неделю</li>
+                                        <li><strong>Последовательность:</strong> Всегда следуйте порядку: Торможение → Удлинение → Активация → Интеграция</li>
+                                        <li><strong>Warm-up:</strong> Фазы 1-3 могут служить интеллектуальной разминкой перед основной тренировкой</li>
+                                        <li><strong>Прогрессия:</strong> Через 4-6 недель проведите повторную оценку</li>
+                                        <li><strong>Форма:</strong> Качество движения важнее количества повторений</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-center mt-8 no-print">
+                            <button 
+                                onClick={() => {
+                                    setStep(0);
+                                    setAssessmentData({ redFlags: [], static: [], dynamic: [], mobility: [] });
+                                }}
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg">
+                                Начать новую оценку
+                            </button>
+                        </div>
+
+                        <Modal 
+                            isOpen={selectedExercise !== null}
+                            onClose={() => setSelectedExercise(null)}
+                            title={selectedExercise?.name || ''}
+                            content={exerciseModalContent}
+                        />
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+    <footer class="bg-gray-800 text-center py-4 mt-8 border-t border-gray-700 no-print">
+        <p class="text-gray-400">Body Balance System | ODA PRO &copy; 2024</p>
+    </footer>
+    
+    <script>
+        window.addEventListener('beforeprint', function() {
+            console.log('Подготовка документа к печати...');
+        });
+    </script>
+</body>
+</html>
+
