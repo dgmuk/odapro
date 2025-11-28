@@ -44,9 +44,13 @@
 
             /* Скрыть интерактивные элементы */
             button, input[type="button"], input[type="submit"], a.btn, 
-            .no-print, nav, footer, [class*="no-print"], 
+            .no-print, nav, [class*="no-print"], 
             .fixed, .sticky, .absolute { 
                 display: none !important; 
+            }
+            
+            footer {
+                display: block !important;
             }
 
             /* Показать только контент */
@@ -116,6 +120,41 @@
             .space-y-2 > *, .space-y-3 > *, .space-y-4 > *, .space-y-6 > * {
                 margin-bottom: 8px !important;
                 margin-top: 0 !important;
+            }
+            
+            /* Упражнения в печати */
+            .exercise-print {
+                display: block !important;
+                page-break-inside: avoid !important;
+                margin: 15px 0 !important;
+                padding: 12px !important;
+                border: 1px solid #333 !important;
+                background: #f9f9f9 !important;
+            }
+            
+            .exercise-print h4 {
+                margin: 0 0 8px 0 !important;
+                font-size: 14px !important;
+                font-weight: bold !important;
+                color: #000 !important;
+            }
+            
+            .exercise-print p {
+                margin: 5px 0 !important;
+                font-size: 11px !important;
+                color: #333 !important;
+            }
+            
+            .exercise-print ol {
+                margin: 10px 0 0 20px !important;
+                padding: 0 !important;
+            }
+            
+            .exercise-print li {
+                margin: 4px 0 !important;
+                font-size: 11px !important;
+                color: #333 !important;
+                page-break-inside: avoid !important;
             }
 
             /* Масштабирование */
@@ -660,11 +699,25 @@
                 if (!ex) return null;
 
                 return (
-                    <div key={exerciseKey} 
-                         className="bg-gray-700 p-4 rounded-lg hover:bg-gray-600 cursor-pointer transition-all print-break border border-gray-600"
-                         onClick={() => setSelectedExercise(ex)}>
-                        <h4 className="font-semibold text-white mb-2">{ex.name}</h4>
-                        <p className="text-gray-300 text-sm">{ex.desc}</p>
+                    <div key={exerciseKey}>
+                        {/* Интерактивная карта для веб-версии */}
+                        <div className="block print:hidden bg-gray-700 p-4 rounded-lg hover:bg-gray-600 cursor-pointer transition-all border border-gray-600"
+                             onClick={() => setSelectedExercise(ex)}>
+                            <h4 className="font-semibold text-white mb-2">{ex.name}</h4>
+                            <p className="text-gray-300 text-sm">{ex.desc}</p>
+                        </div>
+                        
+                        {/* Версия для печати с полной информацией */}
+                        <div className="hidden print:block exercise-print">
+                            <h4>{ex.name}</h4>
+                            <p><strong>Описание:</strong> {ex.desc}</p>
+                            <p><strong>Инструкции:</strong></p>
+                            <ol>
+                                {ex.steps.map((step, idx) => (
+                                    <li key={idx}>{step}</li>
+                                ))}
+                            </ol>
+                        </div>
                     </div>
                 );
             };
@@ -1165,53 +1218,57 @@
 
                                         <div className="space-y-6">
                                             {/* Фаза 1: Inhibit */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-red-400">
-                                    <i className="fas fa-circle mr-2"></i>
-                                    Фаза 1: Торможение (МФР)
-                                </h5>
-                                                <p className="text-gray-400 mb-4 text-sm">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 print:bg-white print:p-3 print:border print:border-gray-400">
+                                                <h5 className="text-lg font-bold mb-3 text-red-400 print:text-red-600 print:text-base print:mb-2">
+                                                    <i className="fas fa-circle mr-2 print:hidden"></i>
+                                                    Фаза 1: Торможение (МФР)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm print:text-gray-700 print:text-xs print:mb-2">
                                                     Снижение активности перенапряженных мышц с помощью самомиофасциального расслабления
                                                 </p>
-                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-1 print:gap-2">
                                                     {syndrome.exercises.inhibit.map(ex => renderExerciseCard(ex))}
                                                 </div>
                                             </div>
 
                                             {/* Фаза 2: Lengthen */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-blue-400">
-                                    <i className="fas fa-arrows-alt-h mr-2"></i>
-                                    Фаза 2: Удлинение (Растяжка)
-                                </h5>
-                                                <p className="text-gray-400 mb-4 text-sm">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 print:bg-white print:p-3 print:border print:border-gray-400">
+                                                <h5 className="text-lg font-bold mb-3 text-blue-400 print:text-blue-600 print:text-base print:mb-2">
+                                                    <i className="fas fa-arrows-alt-h mr-2 print:hidden"></i>
+                                                    Фаза 2: Удлинение (Растяжка)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm print:text-gray-700 print:text-xs print:mb-2">
                                                     Статическая растяжка укороченных мышц для увеличения амплитуды движения
                                                 </p>
-                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-1 print:gap-2">
                                                     {syndrome.exercises.lengthen.map(ex => renderExerciseCard(ex))}
                                                 </div>
                                             </div>
 
                                             {/* Фаза 3: Activate */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-green-400">
-                                    <i className="fas fa-bolt mr-2"></i>
-                                    Фаза 3: Активация (Изоляция)
-                                </h5>
-                                                <p className="text-gray-400 mb-4 text-sm">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 print:bg-white print:p-3 print:border print:border-gray-400">
+                                                <h5 className="text-lg font-bold mb-3 text-green-400 print:text-green-600 print:text-base print:mb-2">
+                                                    <i className="fas fa-bolt mr-2 print:hidden"></i>
+                                                    Фаза 3: Активация (Изоляция)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm print:text-gray-700 print:text-xs print:mb-2">
                                                     Изолированное укрепление недоактивных/ослабленных мышц
                                                 </p>
-                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-1 print:gap-2">
                                                     {syndrome.exercises.activate.map(ex => renderExerciseCard(ex))}
                                                 </div>
                                             </div>
 
                                             {/* Фаза 4: Integrate */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-purple-400">
-                                    <i className="fas fa-running mr-2"></i>
-                                    Фаза 4: Интеграция (Функциональные движения)
-                                </h5>
-                                                <p className="text-gray-400 mb-4 text-sm">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 print:bg-white print:p-3 print:border print:border-gray-400">
+                                                <h5 className="text-lg font-bold mb-3 text-purple-400 print:text-purple-600 print:text-base print:mb-2">
+                                                    <i className="fas fa-running mr-2 print:hidden"></i>
+                                                    Фаза 4: Интеграция (Функциональные движения)
+                                                </h5>
+                                                <p className="text-gray-400 mb-4 text-sm print:text-gray-700 print:text-xs print:mb-2">
                                                     Функциональные движения для восстановления правильных двигательных паттернов
                                                 </p>
-                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-1 print:gap-2">
                                                     {syndrome.exercises.integrate.map(ex => renderExerciseCard(ex))}
                                                 </div>
                                             </div>
