@@ -881,7 +881,7 @@
             if (step === 3) {
                 const dynamicGroups = [
                     {
-                        title: 'Вид спереди (Anterior)',
+                        title: 'Вид спереди',
                         items: [
                             { 
                                 key: 'feet_turn_out', 
@@ -898,7 +898,7 @@
                         ]
                     },
                     {
-                        title: 'Вид сбоку (Lateral)',
+                        title: 'Вид сбоку',
                         items: [
                             { 
                                 key: 'forward_lean_excessive', 
@@ -921,7 +921,7 @@
                         ]
                     },
                     {
-                        title: 'Вид сзади (Posterior)',
+                        title: 'Вид сзади',
                         items: [
                             { 
                                 key: 'heels_rise', 
@@ -1005,7 +1005,7 @@
                             },
                             { 
                                 key: 'apley_fail', 
-                                label: 'Тест Apley Scratch (провал)',
+                                label: 'Тест Эпли на подвижность плеча (провал)',
                                 howTo: 'Тест 1: Рука через верх, пытается дотянуться до противоположной лопатки. Тест 2: Рука снизу за спину, пытается дотянуться до противоположной лопатки.',
                                 whatToLook: 'Не может дотянуться до лопатки с любой стороны. Ограничение подвижности плечевого сустава, капсулы плеча.'
                             }
@@ -1039,13 +1039,13 @@
                         items: [
                             { 
                                 key: 'knee_wall_fail', 
-                                label: 'Тест Knee-to-Wall (<10см)',
+                                label: 'Тест колено-к-стене (<10см)',
                                 howTo: 'Клиент стоит лицом к стене, пятка на полу. Пытается коснуться коленом стены, не отрывая пятку.',
                                 whatToLook: 'Расстояние от пальцев до стены <10см, при котором колено касается стены. Ограничение дорсифлексии голеностопа.'
                             },
                             { 
                                 key: 'aslr_fail', 
-                                label: 'Active Straight Leg Raise (<80°)',
+                                label: 'Активный подъём прямой ноги (<80°)',
                                 howTo: 'Клиент лежит на спине, активно поднимает прямую ногу вверх (не сгибая колено). Другая нога прямая на столе.',
                                 whatToLook: 'Угол <80° от горизонтали. Напряжение задней поверхности бедра (бицепс бедра, полусухожильная), икр.'
                             }
@@ -1165,11 +1165,10 @@
 
                                         <div className="space-y-6">
                                             {/* Фаза 1: Inhibit */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                                                <h5 className="text-lg font-bold mb-3 text-red-400">
-                                                    <i className="fas fa-circle mr-2"></i>
-                                                    Фаза 1: Торможение (Inhibit - SMR)
-                                                </h5>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-red-400">
+                                    <i className="fas fa-circle mr-2"></i>
+                                    Фаза 1: Торможение (МФР)
+                                </h5>
                                                 <p className="text-gray-400 mb-4 text-sm">
                                                     Снижение активности перенапряженных мышц с помощью самомиофасциального расслабления
                                                 </p>
@@ -1179,11 +1178,10 @@
                                             </div>
 
                                             {/* Фаза 2: Lengthen */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                                                <h5 className="text-lg font-bold mb-3 text-blue-400">
-                                                    <i className="fas fa-arrows-alt-h mr-2"></i>
-                                                    Фаза 2: Удлинение (Lengthen - Stretching)
-                                                </h5>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-blue-400">
+                                    <i className="fas fa-arrows-alt-h mr-2"></i>
+                                    Фаза 2: Удлинение (Растяжка)
+                                </h5>
                                                 <p className="text-gray-400 mb-4 text-sm">
                                                     Статическая растяжка укороченных мышц для увеличения амплитуды движения
                                                 </p>
@@ -1193,11 +1191,10 @@
                                             </div>
 
                                             {/* Фаза 3: Activate */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                                                <h5 className="text-lg font-bold mb-3 text-green-400">
-                                                    <i className="fas fa-bolt mr-2"></i>
-                                                    Фаза 3: Активация (Activate - Isolation)
-                                                </h5>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-green-400">
+                                    <i className="fas fa-bolt mr-2"></i>
+                                    Фаза 3: Активация (Изоляция)
+                                </h5>
                                                 <p className="text-gray-400 mb-4 text-sm">
                                                     Изолированное укрепление недоактивных/ослабленных мышц
                                                 </p>
@@ -1207,11 +1204,10 @@
                                             </div>
 
                                             {/* Фаза 4: Integrate */}
-                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-                                                <h5 className="text-lg font-bold mb-3 text-purple-400">
-                                                    <i className="fas fa-running mr-2"></i>
-                                                    Фаза 4: Интеграция (Integrate - Functional)
-                                                </h5>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">                                <h5 className="text-lg font-bold mb-3 text-purple-400">
+                                    <i className="fas fa-running mr-2"></i>
+                                    Фаза 4: Интеграция (Функциональные движения)
+                                </h5>
                                                 <p className="text-gray-400 mb-4 text-sm">
                                                     Функциональные движения для восстановления правильных двигательных паттернов
                                                 </p>
@@ -1267,7 +1263,7 @@
     </script>
 
     <footer class="bg-gray-800 text-center py-4 mt-8 border-t border-gray-700 no-print">
-        <p class="text-gray-400">Body Balance System | ODA PRO &copy; 2024</p>
+        <p class="text-gray-400">Body Balance System | ODA PRO</p>
     </footer>
     
     <script>
