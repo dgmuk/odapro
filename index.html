@@ -21,6 +21,36 @@
         .fade-in { animation: fadeIn 0.5s ease-in; }
         .slide-up { animation: slideUp 0.4s ease-out; }
         
+        @keyframes bodyGlow {
+            0%, 100% { opacity: 0.7; filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.6)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(255, 165, 0, 1)); }
+        }
+        
+        .body-region {
+            fill: #374151;
+            stroke: #4B5563;
+            stroke-width: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .body-region.active-red {
+            fill: #EF4444;
+            opacity: 0.7;
+            animation: bodyGlow 2s ease-in-out infinite;
+        }
+        
+        .body-region.active-orange {
+            fill: #F97316;
+            opacity: 0.7;
+            animation: bodyGlow 2s ease-in-out infinite;
+        }
+        
+        .body-region:hover {
+            fill: #4B5563;
+            stroke-width: 2;
+            cursor: pointer;
+        }
+        
         @media print {
             * {
                 margin: 0 !important;
@@ -630,6 +660,293 @@
             );
         }
 
+        // Компонент подсказки области тела
+        function BodyPartTooltip({ area, label }) {
+            const [showTooltip, setShowTooltip] = useState(false);
+            
+            return (
+                <g onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)} style={{ cursor: 'pointer' }}>
+                    {showTooltip && (
+                        <title>{label}</title>
+                    )}
+                </g>
+            );
+        }
+        
+        // Компонент диаграммы тела
+        function BodyDiagram({ syndromes }) {
+            const [hoveredRegion, setHoveredRegion] = useState(null);
+            
+            // Определение активных областей для каждого синдрома
+            const getActiveRegions = () => {
+                const regions = new Map();
+                
+                syndromes.forEach(syndrome => {
+                    let color = 'active-red';
+                    let areas = [];
+                    
+                    if (syndrome.key === 'upper_crossed') {
+                        areas = ['neck_front', 'shoulders_front', 'upper_back', 'chest', 'upper_arms_l_front', 'upper_arms_r_front', 'neck_back', 'shoulders_back', 'upper_arms_l_back', 'upper_arms_r_back'];
+                        color = 'active-red';
+                    } else if (syndrome.key === 'lower_crossed') {
+                        areas = ['lower_back', 'pelvis_front', 'glutes', 'pelvis_back', 'thighs_l_front', 'thighs_r_front', 'lower_abdomen', 'thighs_l_back', 'thighs_r_back'];
+                        color = 'active-red';
+                    } else if (syndrome.key === 'pronation_distortion') {
+                        areas = ['feet_l_front', 'feet_r_front', 'calves_l_front', 'calves_r_front', 'knees_l_front', 'knees_r_front', 'outer_thighs_l', 'outer_thighs_r', 'feet_l_back', 'feet_r_back', 'calves_l_back', 'calves_r_back', 'knees_l_back', 'knees_r_back'];
+                        color = 'active-orange';
+                    }
+                    
+                    areas.forEach(area => {
+                        regions.set(area, color);
+                    });
+                });
+                
+                return regions;
+            };
+            
+            // Описания областей тела
+            const regionLabels = {
+                'neck_front': 'Шея (передняя)',
+                'neck_back': 'Шея (задняя)',
+                'shoulders_front': 'Плечи (передняя)',
+                'shoulders_back': 'Плечи (задняя)',
+                'upper_back': 'Верхняя спина',
+                'chest': 'Грудь',
+                'upper_arms_l_front': 'Левая рука (передняя)',
+                'upper_arms_r_front': 'Правая рука (передняя)',
+                'upper_arms_l_back': 'Левая рука (задняя)',
+                'upper_arms_r_back': 'Правая рука (задняя)',
+                'lower_back': 'Поясница',
+                'pelvis_front': 'Таз (передний)',
+                'pelvis_back': 'Таз (задний)',
+                'glutes': 'Ягодицы',
+                'thighs_l_front': 'Левое бедро (передняя)',
+                'thighs_r_front': 'Правое бедро (передняя)',
+                'thighs_l_back': 'Левое бедро (задняя)',
+                'thighs_r_back': 'Правое бедро (задняя)',
+                'outer_thighs_l': 'Левое внешнее бедро (TFL)',
+                'outer_thighs_r': 'Правое внешнее бедро (TFL)',
+                'lower_abdomen': 'Нижний живот',
+                'knees_l_front': 'Левое колено (передняя)',
+                'knees_r_front': 'Правое колено (передняя)',
+                'knees_l_back': 'Левое колено (задняя)',
+                'knees_r_back': 'Правое колено (задняя)',
+                'calves_l_front': 'Левая голень (передняя)',
+                'calves_r_front': 'Правая голень (передняя)',
+                'calves_l_back': 'Левая голень (задняя)',
+                'calves_r_back': 'Правая голень (задняя)',
+                'feet_l_front': 'Левая стопа (передняя)',
+                'feet_r_front': 'Правая стопа (передняя)',
+                'feet_l_back': 'Левая стопа (задняя)',
+                'feet_r_back': 'Правая стопа (задняя)'
+            };
+            
+            const activeRegions = getActiveRegions();
+
+            
+            return (
+                <div className="mb-8 bg-gray-900 p-8 rounded-lg border border-gray-700">
+                    <h3 className="text-2xl font-bold mb-6 text-orange-500">Визуализация проблемных зон</h3>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Передний вид */}
+                        <div className="flex flex-col items-center">
+                            <p className="text-gray-300 mb-4 font-semibold text-lg">Вид спереди</p>
+                            <div className="relative">
+                                <svg viewBox="0 0 220 480" className="w-full max-w-sm h-auto" style={{filter: 'drop-shadow(0 0 10px rgba(255, 165, 0, 0.2))'}}>
+                                    {/* Голова */}
+                                    <circle cx="110" cy="35" r="22" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="2" />
+                                    <circle cx="103" cy="30" r="3" fill="#1a1a1a" />
+                                    <circle cx="117" cy="30" r="3" fill="#1a1a1a" />
+                                    <path d="M 110 35 Q 108 38 110 40 Q 112 38 110 35" fill="#1a1a1a" />
+                                    <path d="M 110 40 Q 105 42 110 44 Q 115 42 110 40" fill="#1a1a1a" />
+                                    
+                                    {/* Шея - детальная */}
+                                    <rect x="105" y="55" width="10" height="16" className={`body-region ${activeRegions.has('neck_front') ? activeRegions.get('neck_front') : ''}`} onClick={() => setHoveredRegion('neck_front')} style={{cursor: 'pointer', fill: activeRegions.has('neck_front') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Трапеция и плечи - левая */}
+                                    <path d="M 105 70 Q 80 70 75 85" fill="none" stroke="#5a6c6d" strokeWidth="3" opacity="0.8" />
+                                    {/* Трапеция и плечи - правая */}
+                                    <path d="M 115 70 Q 140 70 145 85" fill="none" stroke="#5a6c6d" strokeWidth="3" opacity="0.8" />
+                                    
+                                    {/* Плечи - выступ */}
+                                    <ellipse cx="110" cy="78" rx="50" ry="16" className={`body-region ${activeRegions.has('shoulders_front') ? activeRegions.get('shoulders_front') : ''}`} onClick={() => setHoveredRegion('shoulders_front')} style={{cursor: 'pointer', fill: activeRegions.has('shoulders_front') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Грудная клетка - большая */}
+                                    <path d="M 65 95 Q 65 110 75 130 L 110 135 L 145 130 Q 155 110 155 95" className={`body-region ${activeRegions.has('chest') ? activeRegions.get('chest') : ''}`} onClick={() => setHoveredRegion('chest')} style={{cursor: 'pointer', fill: activeRegions.has('chest') ? '#EF4444' : '#5a6c6d', opacity: 0.85}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Мышечные линии груди */}
+                                    <line x1="110" y1="95" x2="110" y2="135" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.5" />
+                                    <path d="M 90 110 Q 100 115 110 115" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.5" fill="none" />
+                                    <path d="M 130 110 Q 120 115 110 115" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.5" fill="none" />
+                                    
+                                    {/* Верхняя рука - левая */}
+                                    <rect x="45" y="85" width="22" height="55" rx="11" className={`body-region ${activeRegions.has('upper_arms_l_front') ? activeRegions.get('upper_arms_l_front') : ''}`} onClick={() => setHoveredRegion('upper_arms_l_front')} style={{cursor: 'pointer', fill: activeRegions.has('upper_arms_l_front') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Верхняя рука - правая */}
+                                    <rect x="153" y="85" width="22" height="55" rx="11" className={`body-region ${activeRegions.has('upper_arms_r_front') ? activeRegions.get('upper_arms_r_front') : ''}`} onClick={() => setHoveredRegion('upper_arms_r_front')} style={{cursor: 'pointer', fill: activeRegions.has('upper_arms_r_front') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Предплечья - левая */}
+                                    <rect x="48" y="140" width="16" height="45" rx="8" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.7" />
+                                    
+                                    {/* Предплечья - правая */}
+                                    <rect x="156" y="140" width="16" height="45" rx="8" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.7" />
+                                    
+                                    {/* Кисти - левая */}
+                                    <ellipse cx="56" cy="195" rx="9" ry="12" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.8" />
+                                    
+                                    {/* Кисти - правая */}
+                                    <ellipse cx="164" cy="195" rx="9" ry="12" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.8" />
+                                    
+                                    {/* Живот */}
+                                    <rect x="80" y="135" width="60" height="35" rx="8" className={`body-region ${activeRegions.has('lower_abdomen') ? activeRegions.get('lower_abdomen') : ''}`} onClick={() => setHoveredRegion('lower_abdomen')} style={{cursor: 'pointer', fill: activeRegions.has('lower_abdomen') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" opacity="0.8" />
+                                    
+                                    {/* Мышцы живота - линии */}
+                                    <line x1="110" y1="135" x2="110" y2="170" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.4" />
+                                    <path d="M 95 145 Q 105 148 110 150" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.4" fill="none" />
+                                    <path d="M 125 145 Q 115 148 110 150" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.4" fill="none" />
+                                    
+                                    {/* Таз - передний вид */}
+                                    <path d="M 80 168 Q 75 185 80 200 L 140 200 Q 145 185 140 168" className={`body-region ${activeRegions.has('pelvis_front') ? activeRegions.get('pelvis_front') : ''}`} onClick={() => setHoveredRegion('pelvis_front')} style={{cursor: 'pointer', fill: activeRegions.has('pelvis_front') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" opacity="0.8" />
+                                    
+                                    {/* Левое бедро - передняя сторона */}
+                                    <path d="M 85 198 Q 80 240 85 285" stroke="#5a6c6d" strokeWidth="26" strokeLinecap="round" className={`${activeRegions.has('thighs_l_front') ? 'active-red' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('thighs_l_front')} />
+                                    
+                                    {/* Правое бедро - передняя сторона */}
+                                    <path d="M 135 198 Q 140 240 135 285" stroke="#5a6c6d" strokeWidth="26" strokeLinecap="round" className={`${activeRegions.has('thighs_r_front') ? 'active-red' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('thighs_r_front')} />
+                                    
+                                    {/* Левое колено */}
+                                    <circle cx="83" cy="298" r="13" className={`body-region ${activeRegions.has('knees_l_front') ? activeRegions.get('knees_l_front') : ''}`} onClick={() => setHoveredRegion('knees_l_front')} style={{cursor: 'pointer', fill: activeRegions.has('knees_l_front') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Правое колено */}
+                                    <circle cx="137" cy="298" r="13" className={`body-region ${activeRegions.has('knees_r_front') ? activeRegions.get('knees_r_front') : ''}`} onClick={() => setHoveredRegion('knees_r_front')} style={{cursor: 'pointer', fill: activeRegions.has('knees_r_front') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Левая голень */}
+                                    <path d="M 80 310 Q 78 350 80 390" stroke="#5a6c6d" strokeWidth="18" strokeLinecap="round" className={`${activeRegions.has('calves_l_front') ? 'active-orange' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('calves_l_front')} />
+                                    
+                                    {/* Правая голень */}
+                                    <path d="M 140 310 Q 142 350 140 390" stroke="#5a6c6d" strokeWidth="18" strokeLinecap="round" className={`${activeRegions.has('calves_r_front') ? 'active-orange' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('calves_r_front')} />
+                                    
+                                    {/* Левая стопа */}
+                                    <ellipse cx="80" cy="410" rx="14" ry="20" className={`body-region ${activeRegions.has('feet_l_front') ? activeRegions.get('feet_l_front') : ''}`} onClick={() => setHoveredRegion('feet_l_front')} style={{cursor: 'pointer', fill: activeRegions.has('feet_l_front') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Правая стопа */}
+                                    <ellipse cx="140" cy="410" rx="14" ry="20" className={`body-region ${activeRegions.has('feet_r_front') ? activeRegions.get('feet_r_front') : ''}`} onClick={() => setHoveredRegion('feet_r_front')} style={{cursor: 'pointer', fill: activeRegions.has('feet_r_front') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Боковые (латеральные) части бедер */}
+                                    <ellipse cx="65" cy="255" rx="10" ry="40" className={`${activeRegions.has('outer_thighs_l') ? 'active-orange' : ''}`} style={{cursor: 'pointer', fill: activeRegions.has('outer_thighs_l') ? '#F97316' : '#5a6c6d', opacity: 0.7}} onClick={() => setHoveredRegion('outer_thighs_l')} />
+                                    
+                                    <ellipse cx="155" cy="255" rx="10" ry="40" className={`${activeRegions.has('outer_thighs_r') ? 'active-orange' : ''}`} style={{cursor: 'pointer', fill: activeRegions.has('outer_thighs_r') ? '#F97316' : '#5a6c6d', opacity: 0.7}} onClick={() => setHoveredRegion('outer_thighs_r')} />
+                                </svg>
+                                
+                                {/* Подсказка для переднего вида */}
+                                {hoveredRegion && (
+                                    <div className="absolute top-2 right-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap z-10 shadow-lg">
+                                        {regionLabels[hoveredRegion]}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Задний вид */}
+                        <div className="flex flex-col items-center">
+                            <p className="text-gray-300 mb-4 font-semibold text-lg">Вид сзади</p>
+                            <div className="relative">
+                                <svg viewBox="0 0 220 480" className="w-full max-w-sm h-auto" style={{filter: 'drop-shadow(0 0 10px rgba(255, 165, 0, 0.2))'}}>
+                                    {/* Голова сзади */}
+                                    <circle cx="110" cy="35" r="22" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="2" />
+                                    <path d="M 100 30 Q 98 35 100 40" stroke="#3a4d4f" strokeWidth="1" fill="none" opacity="0.5" />
+                                    <path d="M 120 30 Q 122 35 120 40" stroke="#3a4d4f" strokeWidth="1" fill="none" opacity="0.5" />
+                                    
+                                    {/* Шея сзади */}
+                                    <rect x="105" y="55" width="10" height="16" className={`body-region ${activeRegions.has('neck_back') ? activeRegions.get('neck_back') : ''}`} onClick={() => setHoveredRegion('neck_back')} style={{cursor: 'pointer', fill: activeRegions.has('neck_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Трапеция - верхняя спина (большая площадь) */}
+                                    <path d="M 110 70 L 80 85 Q 75 95 80 115 L 110 120 L 140 115 Q 145 95 140 85 Z" className={`body-region ${activeRegions.has('upper_back') ? activeRegions.get('upper_back') : ''}`} onClick={() => setHoveredRegion('upper_back')} style={{cursor: 'pointer', fill: activeRegions.has('upper_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Мышечные линии спины */}
+                                    <line x1="110" y1="70" x2="110" y2="120" stroke="#3a4d4f" strokeWidth="1" opacity="0.3" />
+                                    <path d="M 95 90 Q 100 95 105 98" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.3" fill="none" />
+                                    <path d="M 125 90 Q 120 95 115 98" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.3" fill="none" />
+                                    
+                                    {/* Верхние руки сзади - левая */}
+                                    <rect x="40" y="85" width="26" height="58" rx="13" className={`body-region ${activeRegions.has('upper_arms_l_back') ? activeRegions.get('upper_arms_l_back') : ''}`} onClick={() => setHoveredRegion('upper_arms_l_back')} style={{cursor: 'pointer', fill: activeRegions.has('upper_arms_l_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Верхние руки сзади - правая */}
+                                    <rect x="154" y="85" width="26" height="58" rx="13" className={`body-region ${activeRegions.has('upper_arms_r_back') ? activeRegions.get('upper_arms_r_back') : ''}`} onClick={() => setHoveredRegion('upper_arms_r_back')} style={{cursor: 'pointer', fill: activeRegions.has('upper_arms_r_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Предплечья сзади - левая */}
+                                    <rect x="43" y="140" width="20" height="48" rx="10" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.7" />
+                                    
+                                    {/* Предплечья сзади - правая */}
+                                    <rect x="157" y="140" width="20" height="48" rx="10" fill="#5a6c6d" stroke="#3a4d4f" strokeWidth="0.5" opacity="0.7" />
+                                    
+                                    {/* Поясница (Lower Back) */}
+                                    <rect x="80" y="120" width="60" height="38" className={`body-region ${activeRegions.has('lower_back') ? activeRegions.get('lower_back') : ''}`} onClick={() => setHoveredRegion('lower_back')} style={{cursor: 'pointer', fill: activeRegions.has('lower_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" opacity="0.85" />
+                                    
+                                    {/* Ягодицы - большие и детальные */}
+                                    <ellipse cx="88" cy="180" rx="28" ry="38" className={`body-region ${activeRegions.has('glutes') ? activeRegions.get('glutes') : ''}`} onClick={() => setHoveredRegion('glutes')} style={{cursor: 'pointer', fill: activeRegions.has('glutes') ? '#EF4444' : '#6b7d7f'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    <ellipse cx="132" cy="180" rx="28" ry="38" className={`body-region ${activeRegions.has('glutes') ? activeRegions.get('glutes') : ''}`} onClick={() => setHoveredRegion('glutes')} style={{cursor: 'pointer', fill: activeRegions.has('glutes') ? '#EF4444' : '#6b7d7f'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Разделение ягодиц */}
+                                    <line x1="110" y1="160" x2="110" y2="210" stroke="#3a4d4f" strokeWidth="1.5" opacity="0.4" />
+                                    
+                                    {/* Таз сзади */}
+                                    <path d="M 80 215 Q 75 230 80 245 L 140 245 Q 145 230 140 215" className={`body-region ${activeRegions.has('pelvis_back') ? activeRegions.get('pelvis_back') : ''}`} onClick={() => setHoveredRegion('pelvis_back')} style={{cursor: 'pointer', fill: activeRegions.has('pelvis_back') ? '#EF4444' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" opacity="0.7" />
+                                    
+                                    {/* Левое бедро - задняя сторона */}
+                                    <path d="M 88 245 Q 85 290 88 330" stroke="#5a6c6d" strokeWidth="28" strokeLinecap="round" className={`${activeRegions.has('thighs_l_back') ? 'active-red' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('thighs_l_back')} />
+                                    
+                                    {/* Правое бедро - задняя сторона */}
+                                    <path d="M 132 245 Q 135 290 132 330" stroke="#5a6c6d" strokeWidth="28" strokeLinecap="round" className={`${activeRegions.has('thighs_r_back') ? 'active-red' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('thighs_r_back')} />
+                                    
+                                    {/* Левое колено сзади */}
+                                    <circle cx="86" cy="345" r="15" className={`body-region ${activeRegions.has('knees_l_back') ? activeRegions.get('knees_l_back') : ''}`} onClick={() => setHoveredRegion('knees_l_back')} style={{cursor: 'pointer', fill: activeRegions.has('knees_l_back') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Правое колено сзади */}
+                                    <circle cx="134" cy="345" r="15" className={`body-region ${activeRegions.has('knees_r_back') ? activeRegions.get('knees_r_back') : ''}`} onClick={() => setHoveredRegion('knees_r_back')} style={{cursor: 'pointer', fill: activeRegions.has('knees_r_back') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Левая голень - икроножная мышца */}
+                                    <path d="M 84 358 Q 82 380 86 410" stroke="#5a6c6d" strokeWidth="20" strokeLinecap="round" className={`${activeRegions.has('calves_l_back') ? 'active-orange' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('calves_l_back')} />
+                                    
+                                    {/* Правая голень - икроножная мышца */}
+                                    <path d="M 136 358 Q 138 380 134 410" stroke="#5a6c6d" strokeWidth="20" strokeLinecap="round" className={`${activeRegions.has('calves_r_back') ? 'active-orange' : ''}`} style={{cursor: 'pointer'}} onClick={() => setHoveredRegion('calves_r_back')} />
+                                    
+                                    {/* Левая стопа сзади */}
+                                    <ellipse cx="86" cy="435" rx="16" ry="24" className={`body-region ${activeRegions.has('feet_l_back') ? activeRegions.get('feet_l_back') : ''}`} onClick={() => setHoveredRegion('feet_l_back')} style={{cursor: 'pointer', fill: activeRegions.has('feet_l_back') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                    
+                                    {/* Правая стопа сзади */}
+                                    <ellipse cx="134" cy="435" rx="16" ry="24" className={`body-region ${activeRegions.has('feet_r_back') ? activeRegions.get('feet_r_back') : ''}`} onClick={() => setHoveredRegion('feet_r_back')} style={{cursor: 'pointer', fill: activeRegions.has('feet_r_back') ? '#F97316' : '#5a6c6d'}} stroke="#3a4d4f" strokeWidth="1" />
+                                </svg>
+                                
+                                {/* Подсказка для заднего вида */}
+                                {hoveredRegion && (
+                                    <div className="absolute top-2 right-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap z-10 shadow-lg">
+                                        {regionLabels[hoveredRegion]}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Легенда */}
+                    <div className="mt-6 flex justify-center gap-8">
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-red-500 rounded"></div>
+                            <span className="text-gray-300 text-sm">Высокий приоритет</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                            <span className="text-gray-300 text-sm">Средний приоритет</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 bg-gray-600 rounded"></div>
+                            <span className="text-gray-300 text-sm">Норма</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
         // Компонент информационной подсказки
         function InfoButton({ title, howTo, whatToLook }) {
             const [isOpen, setIsOpen] = useState(false);
@@ -1183,6 +1500,8 @@
 
                         {hasIssues && (
                             <div>
+                                <BodyDiagram syndromes={syndromes} />
+                                
                                 <div className="mb-8">
                                     <h3 className="text-2xl font-bold mb-4 text-orange-500">Обнаруженные синдромы:</h3>
                                     <div className="grid gap-4">
